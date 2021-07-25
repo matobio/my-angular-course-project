@@ -1,3 +1,4 @@
+import { RecipesResolverService } from './recipes/recipes-resolver.service';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { combineLatest } from 'rxjs';
@@ -15,8 +16,16 @@ const appRoutes: Routes = [
     children: [
       { path: '', component: RecipesStartComponent },
       { path: 'new', component: RecipesEditComponent },
-      { path: ':id', component: RecipesDetailComponent },
-      { path: ':id/edit', component: RecipesEditComponent },
+      {
+        path: ':id',
+        component: RecipesDetailComponent,
+        resolve: [RecipesResolverService],
+      },
+      {
+        path: ':id/edit',
+        component: RecipesEditComponent,
+        resolve: [RecipesResolverService],
+      },
     ],
   },
   { path: 'shopping-list', component: ShoppingListComponent },
