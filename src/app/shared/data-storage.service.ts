@@ -1,3 +1,4 @@
+import { credentials } from './../config/credentials';
 import { Ingredient } from './ingredient.model';
 import { RecipesService } from './../recipes/recipe.service';
 import { Recipe } from './../recipes/recipes.model';
@@ -5,9 +6,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-
-const DATABASE_URL_API =
-  'https://ng-course-receipt-book-default-rtdb.europe-west1.firebasedatabase.app/';
 
 const DATABASE_RECIPES_PATH = '/recipes.json';
 
@@ -22,7 +20,7 @@ export class DataStorageService {
     const recipes = this.recipeServices.getRecipes();
 
     this.http
-      .put(`${DATABASE_URL_API}${DATABASE_RECIPES_PATH}`, recipes)
+      .put(`${credentials.DATABASE_URL_API}${DATABASE_RECIPES_PATH}`, recipes)
       .subscribe((response) => {
         console.log(response);
       });
@@ -30,7 +28,7 @@ export class DataStorageService {
 
   fetchRecipes(): Observable<any> {
     return this.http
-      .get<Recipe[]>(`${DATABASE_URL_API}${DATABASE_RECIPES_PATH}`)
+      .get<Recipe[]>(`${credentials.DATABASE_URL_API}${DATABASE_RECIPES_PATH}`)
       .pipe(
         map((recipes) => {
           return recipes.map((recipe) => {
