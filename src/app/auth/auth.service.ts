@@ -36,8 +36,8 @@ export class AuthService {
 
     return this.http
       .post<AuthResponseData>(`${FIREBASE_API_SIGNUP_URL}${API_KEY}`, {
-        email: email,
-        password: password,
+        email,
+        password,
         returnSecureToken: true,
       })
       .pipe(
@@ -53,7 +53,7 @@ export class AuthService {
       );
   }
 
-  autoLogin() {
+  autoLogin(): void {
     const userData: {
       email: string;
       id: string;
@@ -120,8 +120,8 @@ export class AuthService {
 
     return this.http
       .post<AuthResponseData>(`${FIREBASE_API_SIGNIN_URL}${API_KEY}`, {
-        email: email,
-        password: password,
+        email,
+        password,
         returnSecureToken: true,
       })
       .pipe(
