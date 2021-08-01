@@ -12,6 +12,8 @@ const FIREBASE_API_SIGNUP_URL =
 const FIREBASE_API_SIGNIN_URL =
   'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=';
 
+const USER_DATA = 'userData';
+
 export interface AuthResponseData {
   localId: string;
   email: string;
@@ -25,6 +27,7 @@ export interface AuthResponseData {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   user = new BehaviorSubject<User>(null);
+  private tokenExpirationTimer: any;
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -50,9 +53,48 @@ export class AuthService {
       );
   }
 
+  autoLogin() {
+    const userData: {
+      email: string;
+      id: string;
+      _token: string;
+      _tokenExpirtaionDate: string;
+    } = JSON.parse(localStorage.getItem(USER_DATA));
+    if (!userData) {
+      return;
+    }
+
+    const loadedUser = new User(
+      userData.email,
+      userData.id,
+      userData._token,
+      new Date(userData._tokenExpirtaionDate)
+    );
+
+    if (loadedUser.token) {
+      this.user.next(loadedUser);
+      const expirationDuration =
+        new Date(userData._tokenExpirtaionDate).getTime() -
+        new Date().getTime();
+      this.autoLogout(expirationDuration);
+    }
+  }
+
   logout(): void {
     this.user.next(null);
     this.router.navigate(['/auth']);
+    localStorage.removeItem(USER_DATA);
+
+    if (this.tokenExpirationTimer) {
+      clearTimeout(this.tokenExpirationTimer);
+    }
+    this.tokenExpirationTimer = null;
+  }
+
+  autoLogout(expirationDuration: number): void {
+    this.tokenExpirationTimer = setTimeout(() => {
+      this.logout();
+    }, expirationDuration);
   }
 
   private handleAuthentication(
@@ -65,6 +107,8 @@ export class AuthService {
     const user = new User(email, userId, token, expirationDate);
 
     this.user.next(user);
+    this.autoLogout(expiresIn);
+    localStorage.setItem(USER_DATA, JSON.stringify(user));
   }
 
   login(email: string, password: string): Observable<any> {
