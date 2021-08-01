@@ -1,8 +1,10 @@
+import { User } from './user.model';
 import { credentials } from './../config/credentials';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 const FIREBASE_API_SIGNUP_URL =
   'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=';
@@ -22,7 +24,9 @@ export interface AuthResponseData {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  constructor(private http: HttpClient) {}
+  user = new BehaviorSubject<User>(null);
+
+  constructor(private http: HttpClient, private router: Router) {}
 
   signup(email: string, password: string): Observable<any> {
     const API_KEY = credentials.API_KEY;
@@ -33,7 +37,34 @@ export class AuthService {
         password: password,
         returnSecureToken: true,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        catchError(this.handleError),
+        tap((responseData: AuthResponseData) => {
+          this.handleAuthentication(
+            responseData.email,
+            responseData.localId,
+            responseData.idToken,
+            +responseData.expiresIn
+          );
+        })
+      );
+  }
+
+  logout(): void {
+    this.user.next(null);
+    this.router.navigate(['/auth']);
+  }
+
+  private handleAuthentication(
+    email: string,
+    userId: string,
+    token: string,
+    expiresIn: number
+  ): void {
+    const expirationDate = new Date(new Date().getTime() + expiresIn);
+    const user = new User(email, userId, token, expirationDate);
+
+    this.user.next(user);
   }
 
   login(email: string, password: string): Observable<any> {
@@ -45,7 +76,17 @@ export class AuthService {
         password: password,
         returnSecureToken: true,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        catchError(this.handleError),
+        tap((responseData: AuthResponseData) => {
+          this.handleAuthentication(
+            responseData.email,
+            responseData.localId,
+            responseData.idToken,
+            +responseData.expiresIn
+          );
+        })
+      );
   }
 
   private handleError(errorResponse: HttpErrorResponse): Observable<any> {

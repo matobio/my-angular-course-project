@@ -1,10 +1,11 @@
+import { AuthService } from './../auth/auth.service';
 import { credentials } from './../config/credentials';
 import { Ingredient } from './ingredient.model';
 import { RecipesService } from './../recipes/recipe.service';
 import { Recipe } from './../recipes/recipes.model';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { map, tap } from 'rxjs/operators';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { exhaustMap, map, take, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 const DATABASE_RECIPES_PATH = '/recipes.json';
@@ -13,7 +14,8 @@ const DATABASE_RECIPES_PATH = '/recipes.json';
 export class DataStorageService {
   constructor(
     private http: HttpClient,
-    private recipeServices: RecipesService
+    private recipeServices: RecipesService,
+    private authService: AuthService
   ) {}
 
   storeRecipes(): void {
