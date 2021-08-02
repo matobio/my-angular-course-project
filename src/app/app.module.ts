@@ -1,3 +1,5 @@
+import { PlaceholderDirective } from './shared/placeholder/placeholder.directive';
+import { AlertComponent } from './shared/alert/alert.component';
 import { AuthInterceptorService } from './auth/auth-interceptor.service';
 import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
 import { AuthComponent } from './auth/auth.component';
@@ -37,6 +39,8 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
     DropdownDirective,
     AuthComponent,
     LoadingSpinnerComponent,
+    AlertComponent,
+    PlaceholderDirective,
   ],
   imports: [
     BrowserModule,
@@ -55,5 +59,6 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
     },
   ],
   bootstrap: [AppComponent],
+  entryComponents: [AlertComponent],
 })
 export class AppModule {}

@@ -1,21 +1,42 @@
+import { PlaceholderDirective } from './../shared/placeholder/placeholder.directive';
+import { AlertComponent } from './../shared/alert/alert.component';
 import { AuthService, AuthResponseData } from './auth.service';
 import { NgForm } from '@angular/forms';
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import {
+  Component,
+  ComponentFactoryResolver,
+  OnDestroy,
+  ViewChild,
+} from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-import { timestamp } from 'rxjs/operators';
 
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css'],
 })
-export class AuthComponent {
+export class AuthComponent implements OnDestroy {
+  @ViewChild(PlaceholderDirective)
+  alertHost: PlaceholderDirective;
+
+  private closeSub = new Subscription();
+
   isLoginMode = true;
   isLoading = false;
   error: string = null;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private componentFactoryResolver: ComponentFactoryResolver
+  ) {}
+
+  ngOnDestroy(): void {
+    if (this.closeSub) {
+      this.closeSub.unsubscribe();
+    }
+  }
 
   onSwitchMode(): void {
     this.isLoginMode = !this.isLoginMode;
@@ -46,9 +67,30 @@ export class AuthComponent {
       (errorMessage) => {
         this.isLoading = false;
         this.error = errorMessage;
+        this.showErrorAlert(errorMessage);
       }
     );
 
     form.reset();
+  }
+
+  onHandlerError(): void {
+    this.error = null;
+  }
+
+  private showErrorAlert(errorMessage: string): void {
+    const alertComponentFctory =
+      this.componentFactoryResolver.resolveComponentFactory(AlertComponent);
+    const hostViewContainerRef = this.alertHost.viewContainerRef;
+    hostViewContainerRef.clear();
+
+    const componentRef =
+      hostViewContainerRef.createComponent(alertComponentFctory);
+
+    componentRef.instance.message = errorMessage;
+    this.closeSub = componentRef.instance.closeEvent.subscribe(() => {
+      this.closeSub.unsubscribe();
+      hostViewContainerRef.clear();
+    });
   }
 }
