@@ -1,3 +1,4 @@
+import { LoggingService } from './logging.service';
 import { AuthService } from './auth/auth.service';
 import { Component, HostListener, OnInit } from '@angular/core';
 
@@ -12,10 +13,14 @@ export class AppComponent implements OnInit {
 
   element: any;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private loggingService: LoggingService
+  ) {}
 
   ngOnInit(): void {
     this.authService.autoLogin();
+    this.loggingService.pringLog('Hello from AppComponent ngOnInit');
   }
 
   @HostListener('window:click', ['$event.target'])
