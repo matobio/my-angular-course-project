@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[5],{"7Lvj":function(n,t,e){"use strict";e.r(t),e.d(t,"RecipesModule",(function(){return s}));var o=e("tyNb"),r=e("3Pt+"),c=e("PCNd"),i=e("fXoL");let s=(()=>{class n{}return n.\u0275mod=i.Fb({type:n}),n.\u0275inj=i.Eb({factory:function(t){return new(t||n)},imports:[[o.e,r.r,c.a]]}),n})()}}]);
